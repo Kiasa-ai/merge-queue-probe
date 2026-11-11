@@ -1,0 +1,12 @@
+name: dispatch-ci
+# Question 12 add-on: does a ci-status CHECK RUN from a workflow_dispatch run satisfy the ruleset?
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ci-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: echo "event=$GITHUB_EVENT_NAME sha=$GITHUB_SHA"
