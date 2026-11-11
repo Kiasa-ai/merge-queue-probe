@@ -1,3 +1,4 @@
+# probe: a comment at the top
 name: ci
 # Probe copy of the shape that matters: pull_request plus queue pushes,
 # one job named ci-status, one cancelling group for queue pushes.
@@ -30,4 +31,3 @@ jobs:
           if [ -f FAIL_FIRST_ATTEMPT ] && [ "$ATTEMPT" = 1 ]; then echo "first attempt fails"; exit 1; fi
           if [ -f FAIL_RERUN ] && [ "$ATTEMPT" != 1 ]; then echo "a rerun fails"; exit 1; fi
           echo ok
-# probe: a comment-only change
