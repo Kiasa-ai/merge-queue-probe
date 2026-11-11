@@ -10,6 +10,12 @@ on:
     branches:
       - 'merge-queue/main/**'
       - 'merge-queue-fresh/main/**'
+  # A full run on main, as Kiasa's scheduled and manual runs; `fail: yes` makes it red on purpose.
+  workflow_dispatch:
+    inputs:
+      fail:
+        description: "yes: this full run fails on purpose"
+        default: "no"
 permissions:
   contents: read
 concurrency:
@@ -26,8 +32,10 @@ jobs:
       - name: tests
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          FAIL_ON_PURPOSE: ${{ inputs.fail }}
         run: |
           echo "event=$GITHUB_EVENT_NAME ref=$GITHUB_REF sha=$GITHUB_SHA"
+          if [ "$FAIL_ON_PURPOSE" = yes ]; then echo "a red full run, on purpose"; exit 1; fi
           failed=""
           for f in $(find . -name '*.test.mjs' -not -path './.git/*' | sort); do
             if node --test "$f" > out.txt 2>&1; then echo "ok $f"; else
