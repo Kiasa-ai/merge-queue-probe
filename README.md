@@ -1,2 +1,3 @@
 # merge-queue-probe
-Scratch repository for testing GitHub ruleset and API behaviour. No product code.
+
+A throwaway repository for testing how GitHub treats a self-run merge queue. It holds no product code.

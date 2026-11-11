@@ -1,0 +1,32 @@
+name: ci
+# Probe copy of the shape that matters: pull_request plus queue pushes,
+# one job named ci-status, one cancelling group for queue pushes.
+on:
+  pull_request:
+  push:
+    branches:
+      - 'merge-queue/main/**'
+      - 'merge-queue-fresh/main/**'
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.event_name == 'push' && 'ci-merge-queue' || format('ci-pr-{0}', github.event.pull_request.number) }}
+  cancel-in-progress: true
+jobs:
+  ci-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: verdict
+        env:
+          ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          echo "event=$GITHUB_EVENT_NAME ref=$GITHUB_REF sha=$GITHUB_SHA attempt=$ATTEMPT"
+          if [ -f SLEEP ]; then sleep "$(cat SLEEP)"; fi
+          if [ -f FAIL ]; then echo "FAIL file present"; exit 1; fi
+          if [ -f FAIL_FIRST_ATTEMPT ] && [ "$ATTEMPT" = 1 ]; then echo "first attempt fails"; exit 1; fi
+          if [ -f FAIL_RERUN ] && [ "$ATTEMPT" != 1 ]; then echo "a rerun fails"; exit 1; fi
+          echo ok

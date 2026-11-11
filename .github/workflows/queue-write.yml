@@ -1,0 +1,37 @@
+name: queue-write
+# Question 15: can a workflow's GITHUB_TOKEN with contents: write touch the queue branches or main?
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        required: true
+permissions:
+  contents: write
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: try writes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ inputs.sha }}
+        run: |
+          set +e
+          r="repos/$GITHUB_REPOSITORY/git/refs"
+          echo "== API create merge-queue/main/gh-token-api"
+          gh api -X POST "$r" -f ref=refs/heads/merge-queue/main/gh-token-api -f sha="$SHA"; echo "exit=$?"
+          echo "== API update merge-queue-build/main"
+          gh api -X PATCH "$r/heads/merge-queue-build/main" -f sha="$SHA" -F force=true; echo "exit=$?"
+          echo "== API delete merge-queue-build/main"
+          gh api -X DELETE "$r/heads/merge-queue-build/main"; echo "exit=$?"
+          echo "== API create probe/gh-token-control (no ruleset covers it)"
+          gh api -X POST "$r" -f ref=refs/heads/probe/gh-token-control -f sha="$SHA"; echo "exit=$?"
+          echo "== API move main"
+          gh api -X PATCH "$r/heads/main" -f sha="$SHA" -F force=false; echo "exit=$?"
+          echo "== git push to merge-queue/main/gh-token-git"
+          git init -q w && cd w
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git -c http.extraheader="$auth" fetch -q --depth=1 origin "$SHA"; echo "fetch exit=$?"
+          git -c http.extraheader="$auth" push origin "$SHA:refs/heads/merge-queue/main/gh-token-git"; echo "exit=$?"

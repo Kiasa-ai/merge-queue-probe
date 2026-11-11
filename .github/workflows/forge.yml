@@ -1,0 +1,22 @@
+name: forge
+# Question 11: a workflow job with statuses: write writes a commit status.
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        required: true
+      context:
+        required: true
+permissions:
+  statuses: write
+jobs:
+  forge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: write status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ inputs.sha }}
+          CTX: ${{ inputs.context }}
+        run: gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=success -f context="$CTX" -f description=forged-by-workflow --jq '{id, context, state, creator: .creator.login}'
