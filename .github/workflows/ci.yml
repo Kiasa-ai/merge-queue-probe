@@ -30,4 +30,4 @@ jobs:
           if [ -f FAIL_FIRST_ATTEMPT ] && [ "$ATTEMPT" = 1 ]; then echo "first attempt fails"; exit 1; fi
           if [ -f FAIL_RERUN ] && [ "$ATTEMPT" != 1 ]; then echo "a rerun fails"; exit 1; fi
           echo ok
-# probe: a comment-only change
+# probe: a comment-only change# probe: a comment at the end
