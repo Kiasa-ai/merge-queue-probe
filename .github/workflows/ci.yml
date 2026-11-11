@@ -1,3 +1,4 @@
+# drill: a comment at the top
 name: ci
 # Probe copy of the shape that matters: pull_request plus queue pushes,
 # one job named ci-status, one cancelling group for queue pushes.
